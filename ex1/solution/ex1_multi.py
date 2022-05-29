@@ -17,6 +17,11 @@ def gradient_descent(X, y, theta, alpha, epoch):
     return theta, cost
 
 
+def normal_eqn(X, y):
+    # np.linalg.inv 求逆, @ operator用于表示乘法
+    return np.linalg.inv(X.T @ X) @ X.T @ y
+
+
 def main():
     data = pd.read_csv('ex1data2.txt', sep=',', header=None, names=['Size', 'Bedrooms', 'Price'])
     print(data.head())
@@ -35,7 +40,9 @@ def main():
     y = np.mat(y.values)
     theta = np.mat([0, 0, 0])
     alpha = 0.01
-    epoch = 400
+    epoch = 1500
+
+    print(normal_eqn(X,y))
 
     f_theta, cost = gradient_descent(X, y, theta, alpha, epoch)
     print(f_theta)
