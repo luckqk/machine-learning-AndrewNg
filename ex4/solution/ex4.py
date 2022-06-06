@@ -85,6 +85,45 @@ def reg_gradient(theta_serialize, X, y, lamda):
     return serialize(D1, D2)
 
 
+# 无正则化的优化, 容易产生过拟合
+def nn_training(X, y):
+    init_theta = np.random.uniform(-0.5, 0.5, 10285)
+    res = minimize(fun=cost,
+                   x0=init_theta,
+                   args=(X, y),
+                   method='TNC',
+                   jac=gradient,
+                   options= {'maxiter': 300})
+
+    return res
+
+
+# 带正则化的优化
+def reg_nn_training(X, y, lamda):
+    init_theta = np.random.uniform(-0.5, 0.5, 10285)
+    res = minimize(fun=reg_cost,
+                   x0=init_theta,
+                   args=(X, y, lamda),
+                   method='TNC',
+                   jac=reg_gradient,
+                   options= {'maxiter': 300})
+
+    return res
+
+
+def plot_hidden_layer(theta):
+    theta1, _ = deserialize(theta)
+    hidden_layer = theta1[:, 1:]
+
+    fig, ax_array = plt.subplots(nrows=5, ncols=5, sharex=True, sharey=True, figsize=(8, 8))
+    for row in range(5):
+        for col in range(5):
+            ax_array[row, col].imshow(hidden_layer[5 * row + col].reshape(20, 20).T, cmap='gray_r')
+    plt.xticks([])
+    plt.xticks([])
+    plt.show()
+
+
 def main():
     data = sio.loadmat('ex4data1.mat')
     raw_X = data['X']
@@ -106,6 +145,16 @@ def main():
     lamda = 1
     curt_reg_cost = reg_cost(theta_serialize, X, y, lamda)
     print(f'reg cost: {curt_reg_cost}')
+
+    lamda = 10
+    res = reg_nn_training(X, y, lamda)
+    raw_y = data['y'].reshape(5000,)
+    _, _, _, _, h = feed_forward(res.x, X)
+    y_pred = np.argmax(h, axis=1) + 1
+    acc = np.mean(y_pred == raw_y)
+    print(f'accuracy: {acc}')
+
+    plot_hidden_layer(res.x)
 
 
 if __name__ == '__main__':
